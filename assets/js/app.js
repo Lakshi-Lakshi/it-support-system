@@ -7,6 +7,14 @@
   const profileToggle = document.querySelector('[data-profile-toggle]');
   const profileDropdown = document.getElementById('profileDropdown');
   const settingsModal = document.querySelector('[data-settings-modal]');
+  const profileImageInput = document.querySelector('[data-profile-image-input]');
+  const profileImageEdit = document.querySelector('[data-profile-image-edit]');
+  const profileImageDelete = document.querySelector('[data-profile-image-delete]');
+  const profileImageModal = document.querySelector('[data-profile-image-modal]');
+  const profileImageModalInput = document.querySelector('[data-profile-image-modal-input]');
+  const profileImageSave = document.querySelector('[data-profile-image-save]');
+  const removeProfileImage = document.querySelector('[data-remove-profile-image]');
+  const profileSettingsForm = document.querySelector('.profile-settings-form');
   const searchForm = document.querySelector('.global-search');
 
   const isMobile = () => window.matchMedia('(max-width: 760px)').matches;
@@ -43,6 +51,7 @@
     if (event.key === 'Escape') {
       closeMobile();
       closeProfileMenu();
+      closeProfileImageModal();
       closeSettings();
     }
   });
@@ -67,6 +76,19 @@
     document.body.classList.remove('modal-open');
   };
 
+  const openProfileImageModal = () => {
+    if (!profileImageModal) return;
+    profileImageModal.hidden = false;
+    profileImageModalInput && (profileImageModalInput.value = '');
+    profileImageModal.querySelector('[data-profile-image-close]')?.focus();
+  };
+
+  const closeProfileImageModal = () => {
+    if (!profileImageModal || profileImageModal.hidden) return;
+    profileImageModal.hidden = true;
+    if (profileImageModalInput) profileImageModalInput.value = '';
+  };
+
   profileToggle?.addEventListener('click', (event) => {
     event.stopPropagation();
     const willOpen = profileDropdown?.hidden;
@@ -80,6 +102,33 @@
   });
   document.querySelectorAll('[data-settings-close]').forEach(button => {
     button.addEventListener('click', closeSettings);
+  });
+
+  profileImageEdit?.addEventListener('click', openProfileImageModal);
+  document.querySelectorAll('[data-profile-image-close]').forEach(button => {
+    button.addEventListener('click', closeProfileImageModal);
+  });
+  profileImageSave?.addEventListener('click', () => {
+    const file = profileImageModalInput?.files?.[0];
+    if (!file || !profileImageInput || !profileSettingsForm) {
+      window.alert('Select an image before saving.');
+      return;
+    }
+
+    if (!['image/png', 'image/jpeg'].includes(file.type) || file.size > 10 * 1024 * 1024) {
+      window.alert('Choose a PNG, JPG, or JPEG image up to 10 MB.');
+      return;
+    }
+
+    const transfer = new DataTransfer();
+    transfer.items.add(file);
+    profileImageInput.files = transfer.files;
+    profileSettingsForm.requestSubmit();
+  });
+  profileImageDelete?.addEventListener('click', () => {
+    if (!removeProfileImage || !profileSettingsForm) return;
+    removeProfileImage.value = '1';
+    profileSettingsForm.requestSubmit();
   });
 
   document.addEventListener('click', (event) => {

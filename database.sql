@@ -53,3 +53,7 @@ CREATE TABLE IF NOT EXISTS notifications (
     CONSTRAINT fk_notification_ticket FOREIGN KEY (ticket_id) REFERENCES tickets(id) ON DELETE CASCADE,
     INDEX idx_notification_user_read (user_id, is_read)
 ) ENGINE=InnoDB;
+
+-- img store url
+ALTER TABLE users
+ADD COLUMN profile_img_url VARCHAR(500) DEFAULT NULL;

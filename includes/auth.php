@@ -19,6 +19,7 @@ function login_user(array $user): void
         'name' => $user['name'],
         'email' => $user['email'],
         'role' => $user['role'],
+        'profile_img_url' => $user['profile_img_url'] ?? null,
     ];
 }
 

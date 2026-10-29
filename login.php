@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $error = 'Please enter your email and password.';
     } else {
         try {
-            $stmt = db()->prepare("SELECT id,name,email,password,role FROM users WHERE email = ? LIMIT 1");
+            $stmt = db()->prepare("SELECT id,name,email,password,role,profile_img_url FROM users WHERE email = ? LIMIT 1");
             $stmt->execute([$email]);
             $user = $stmt->fetch();
 

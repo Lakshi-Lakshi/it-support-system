@@ -14,7 +14,6 @@ try {
     $server->exec("CREATE DATABASE IF NOT EXISTS `" . DB_NAME . "` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci");
 
     $pdo = db();
-
     $sql = file_get_contents(__DIR__ . '/database.sql');
     $statements = array_filter(array_map('trim', preg_split('/;\s*(?:\r?\n|$)/', $sql)));
 
@@ -22,6 +21,10 @@ try {
         if ($statement !== '' && stripos($statement, 'CREATE DATABASE') !== 0 && stripos($statement, 'USE ') !== 0) {
             $pdo->exec($statement);
         }
+    }
+    $userColumns = $pdo->query("SHOW COLUMNS FROM users LIKE 'profile_img_url'")->fetch();
+    if (!$userColumns) {
+        $pdo->exec("ALTER TABLE users ADD COLUMN profile_img_url VARCHAR(255) NULL AFTER role");
     }
 
     $demoUsers = [
