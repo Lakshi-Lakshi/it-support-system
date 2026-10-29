@@ -72,3 +72,5 @@ include __DIR__ . '/includes/header.php';
     </div>
 </section>
 <?php include __DIR__ . '/includes/footer.php'; ?>
+
+<script src="/it-support-system/assets/js/password-toggle.js"></script>

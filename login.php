@@ -114,5 +114,6 @@ $pageTitle = 'Login | SupportHub';
     </section>
   </div>
 </div>
+<script src="/it-support-system/assets/js/password-toggle.js"></script>
 </body>
 </html>
