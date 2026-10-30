@@ -63,7 +63,9 @@ if ($roleFilter !== '' && in_array($roleFilter, ['client','staff','admin'], true
     $params[] = $roleFilter;
 }
 
-$sql = 'SELECT id,name,email,role,created_at FROM users';
+/* ADDED last_login */
+$sql = 'SELECT id,name,email,role,created_at,last_login FROM users';
+
 if ($where) {
     $sql .= ' WHERE ' . implode(' AND ', $where);
 }
@@ -176,18 +178,55 @@ include __DIR__ . '/../includes/header.php';
 
     <div class="table-wrap">
         <table class="table">
-            <thead><tr><th>User</th><th>Email</th><th>Role</th><th>Joined</th><th>Account</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>User</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Joined</th>
+                    <th>Last Login</th>
+                </tr>
+            </thead>
             <tbody>
             <?php foreach ($rows as $u): ?>
                 <tr>
-                    <td><div class="user-cell"><span class="user-list-avatar"><?= strtoupper(substr($u['name'],0,1)) ?></span><div><strong><?= htmlspecialchars($u['name']) ?></strong><?php if ((int)$u['id'] === (int)current_user()['id']): ?><small>Current session</small><?php endif; ?></div></div></td>
+                    <td>
+                        <div class="user-cell">
+                            <span class="user-list-avatar"><?= strtoupper(substr($u['name'],0,1)) ?></span>
+                            <div>
+                                <strong><?= htmlspecialchars($u['name']) ?></strong>
+                                <?php if ((int)$u['id'] === (int)current_user()['id']): ?>
+                                    <small>Current session</small>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </td>
+
                     <td><?= htmlspecialchars($u['email']) ?></td>
-                    <td><span class="role-badge role-<?= htmlspecialchars($u['role']) ?>"><?= htmlspecialchars(ucfirst($u['role'])) ?></span></td>
+
+                    <td>
+                        <span class="role-badge role-<?= htmlspecialchars($u['role']) ?>">
+                            <?= htmlspecialchars(ucfirst($u['role'])) ?>
+                        </span>
+                    </td>
+
                     <td><?= date('d M Y, h:i A', strtotime($u['created_at'])) ?></td>
-                    <td><span class="account-active"><i></i> Active</span></td>
+
+                    <td>
+                        <?php if (!empty($u['last_login'])): ?>
+                            <span class="last-login-time">
+                                <?= date('d M Y, h:i A', strtotime($u['last_login'])) ?>
+                            </span>
+                        <?php else: ?>
+                            <span class="never-login">Never Logged In</span>
+                        <?php endif; ?>
+                    </td>
                 </tr>
             <?php endforeach; ?>
-            <?php if (!$rows): ?><tr><td colspan="5" class="analytics-empty-cell">No users match your search.</td></tr><?php endif; ?>
+
+            <?php if (!$rows): ?>
+                <tr><td colspan="5" class="analytics-empty-cell">No users match your search.</td></tr>
+            <?php endif; ?>
             </tbody>
         </table>
     </div>
@@ -199,6 +238,11 @@ include __DIR__ . '/../includes/header.php';
 .user-management-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}.management-heading{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:18px}.management-heading h2{margin:0;font-size:16px}.management-heading p{margin:5px 0 0;color:#8a96a8;font-size:10px;line-height:1.5}.secure-badge{font-size:8px;font-weight:800;color:#2563eb;background:#eff6ff;border-radius:999px;padding:6px 8px;white-space:nowrap}.account-policy-card{background:linear-gradient(135deg,#fff,#f8fbff)}
 .role-guide{display:grid;gap:12px}.role-guide-item{display:flex;align-items:center;gap:10px;padding:11px;border:1px solid #edf1f6;border-radius:12px;background:#fff}.role-guide-item strong,.role-guide-item small{display:block}.role-guide-item strong{font-size:11px}.role-guide-item small{font-size:9px;color:#8a96a8;margin-top:3px;line-height:1.4}.role-dot{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:10px;font-weight:800}.client-dot{background:#eff6ff;color:#2563eb}.staff-dot{background:#eef2ff;color:#4f46e5}.admin-dot{background:#fff7ed;color:#c2410c}.policy-note{margin-top:15px;padding:11px 12px;border-radius:11px;background:#f8fafc;border:1px solid #e8edf4}.policy-note strong,.policy-note span{display:block}.policy-note strong{font-size:10px}.policy-note span{font-size:9px;color:#718096;line-height:1.5;margin-top:3px}
 .user-list-card{margin-top:18px}.list-heading{align-items:center}.record-count{font-size:9px;font-weight:800;color:#64748b;background:#f1f5f9;padding:6px 9px;border-radius:999px;white-space:nowrap}.user-filter-form{display:grid;grid-template-columns:1fr 180px auto auto;gap:10px;margin-bottom:16px}.user-cell{display:flex;align-items:center;gap:9px}.user-cell small{display:block;color:#94a3b8;font-size:8px;margin-top:2px}.user-list-avatar{width:31px;height:31px;border-radius:50%;background:#e8f0ff;color:#2563eb;display:grid;place-items:center;font-weight:800;font-size:10px;flex:0 0 auto}.role-badge{display:inline-flex;padding:5px 9px;border-radius:999px;font-size:9px;font-weight:800}.role-client{background:#eff6ff;color:#1d4ed8}.role-staff{background:#eef2ff;color:#4f46e5}.role-admin{background:#fff7ed;color:#c2410c}.account-active{display:inline-flex;align-items:center;gap:5px;color:#15803d;font-size:9px;font-weight:800}.account-active i{width:6px;height:6px;border-radius:50%;background:#22c55e}
+
+/* Last login display */
+.last-login-time{font-size:10px;color:#334155;font-weight:600;white-space:nowrap}
+.never-login{font-size:9px;color:#94a3b8;font-style:italic;white-space:nowrap}
+
 @media(max-width:1050px){.user-kpi-grid{grid-template-columns:repeat(2,1fr)}.user-management-grid{grid-template-columns:1fr}.user-filter-form{grid-template-columns:1fr 180px auto auto}}
 @media(max-width:650px){.user-kpi-grid{grid-template-columns:1fr}.user-filter-form{grid-template-columns:1fr}.list-heading{align-items:flex-start;flex-direction:column}}
 </style>

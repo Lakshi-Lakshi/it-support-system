@@ -7,6 +7,17 @@ $pageTitle = 'Admin Dashboard | SupportHub';
 
 $pdo = db();
 
+/* GET ADMIN PREVIOUS LOGIN TIME */
+$adminId = (int)current_user()['id'];
+
+$stmt = $pdo->prepare("
+    SELECT previous_login
+    FROM users
+    WHERE id = ?
+");
+$stmt->execute([$adminId]);
+$previousLogin = $stmt->fetchColumn();
+
 /* Core ticket metrics */
 $total = (int)$pdo->query("SELECT COUNT(*) FROM tickets")->fetchColumn();
 $open = (int)$pdo->query("SELECT COUNT(*) FROM tickets WHERE status='Open'")->fetchColumn();
@@ -104,7 +115,17 @@ include __DIR__ . '/../includes/header.php';
 
 <div class="dashboard-hero">
     <div><span class="eyebrow">ADMIN CONTROL CENTER</span><h2>Good afternoon, <?= htmlspecialchars(explode(' ', trim(current_user()['name']))[0]) ?>. 👋</h2><p>Here is an overview of your IT support operations, workload and recent ticket activity.</p></div>
-    <div class="quick-action"><div class="dashboard-date"><strong><?= date('l, d M Y') ?></strong><?= date('h:i A') ?></div><a class="btn btn-primary" href="/it-support-system/admin/tickets.php">Manage Tickets →</a></div>
+
+    <div class="quick-action">
+        <div class="dashboard-date">
+            <strong>Previous Login</strong>
+            <?= $previousLogin
+                ? date('d M Y, h:i A', strtotime($previousLogin))
+                : 'First Login'
+            ?>
+        </div>
+        <a class="btn btn-primary" href="/it-support-system/admin/tickets.php">Manage Tickets →</a>
+    </div>
 </div>
 
 <!-- KPI row -->
