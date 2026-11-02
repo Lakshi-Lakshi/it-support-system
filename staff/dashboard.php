@@ -7,6 +7,15 @@ $pageTitle = 'Staff Dashboard | SupportHub';
 $pdo = db();
 $staffId = current_user()['id'];
 
+// GET PREVIOUS LOGIN TIME
+$stmt = $pdo->prepare("
+    SELECT previous_login
+    FROM users
+    WHERE id = ?
+");
+$stmt->execute([$staffId]);
+$previousLogin = $stmt->fetchColumn();
+
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM tickets WHERE assigned_to=?"); $stmt->execute([$staffId]); $total=(int)$stmt->fetchColumn();
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM tickets WHERE assigned_to=? AND status IN ('Assigned','In Progress')"); $stmt->execute([$staffId]); $active=(int)$stmt->fetchColumn();
 $stmt = $pdo->prepare("SELECT COUNT(*) FROM tickets WHERE assigned_to=? AND status='Resolved'"); $stmt->execute([$staffId]); $resolved=(int)$stmt->fetchColumn();
@@ -19,7 +28,14 @@ include __DIR__ . '/../includes/header.php';
 
 <div class="dashboard-hero">
     <div><span class="eyebrow">SUPPORT WORKSPACE</span><h2>Good afternoon, <?= htmlspecialchars(explode(' ', trim(current_user()['name']))[0]) ?>. 👋</h2><p>Here are the support requests currently assigned to you.</p></div>
-    <div class="dashboard-date"><strong><?= date('l, d M Y') ?></strong><?= date('h:i A') ?></div>
+
+    <div class="dashboard-date">
+        <strong>Previous Login</strong>
+        <?= $previousLogin
+            ? date('d M Y, h:i A', strtotime($previousLogin))
+            : 'First Login'
+        ?>
+    </div>
 </div>
 
 <div class="stat-grid-four">

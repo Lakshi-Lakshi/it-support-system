@@ -22,11 +22,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $user = $stmt->fetch();
 
             if ($user && password_verify($password, $user['password'])) {
+
+                // LAST LOGIN TIME UPDATE
+                $update = db()->prepare("
+                    UPDATE users
+                    SET previous_login = last_login,
+                        last_login = NOW()
+                    WHERE id = ?
+                ");
+
+                $update->execute([$user['id']]);
+
+                // LOGIN SESSION
                 login_user($user);
+
                 header('Location: ' . dashboard_url($user['role']));
                 exit;
             }
+
             $error = 'Invalid email or password.';
+
         } catch (Throwable $e) {
             $error = 'Database connection failed. Check XAMPP/MySQL and setup.php.';
         }
